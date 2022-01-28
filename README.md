@@ -3,9 +3,19 @@
 ## 目录
 
 - [目录](#目录)
-- [Verilog 学习](#Verilog学习)
+- [Verilog 学习](#Verilog-学习)
 - [数字电路设计学习](#数字电路设计学习)
-- [EDA 学习](#EDA学习)
+- [EDA 学习](#EDA-学习)
+	- [EDA 设计流程](#EDA-设计流程)
+	- [EDA 工具](#EDA-工具)
+	- [IP 核](#IP-核)
+	- [PLD](#Programmable-Logic-Device-PLD)
+	- [VHDL 设计](#VHDL-设计)
+		- [二选一多路选择器](#二选一多路选择器)
+		- [四选一多路选择器](#四选一多路选择器)
+		- [1 位半加器](#1-位半加器)
+		- [1 位全加器](#1-位全加器)
+		- [8 位加法器](#8-位加法器) 
 - [参考链接](#参考链接)
 
 ## Verilog 学习
@@ -539,16 +549,10 @@ ARCHITECTURE bhv OF adder8 IS
 ## 参考链接
 
 [EDA b站教程](https://www.bilibili.com/video/BV1rK411W717?p=1)
-
 [Verilog 教程](https://www.runoob.com/w3cnote/verilog-tutorial.html)
-
 [ABC](https://people.eecs.berkeley.edu/~alanmi/abc/)
-
 [EPFL](https://www.epfl.ch/labs/lsi/page-102566-en-html/benchmarks/)
-
 [EPFL - GitHub](https://github.com/WilliamX1/benchmarks)
-
 [谷歌布局布线开源论文](https://abopen.com/news/google-research-releases-circuit-training-an-open-source-framework-for-automated-chip-floorplanning/)
-
 [谷歌布局布线开源论文 - GitHub](https://github.com/google-research/circuit_training)
 
