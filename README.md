@@ -16,6 +16,7 @@
 		- [1 位半加器](#1-位半加器)
 		- [1 位全加器](#1-位全加器)
 		- [8 位加法器](#8-位加法器) 
+		- [乘法器](#乘法器)
 - [参考链接](#参考链接)
 
 ## Verilog 学习
@@ -524,7 +525,7 @@ ARCHITECTURE bhv OF adder8 IS:
   END ARCHITECTURE bhv;
 ```
 
-也可以直接使用 `VHDL` 预定义的算术运算符 `+`。
+也可以直接使用 `VHDL` 预定义的算术运算符 `+`。**运算符重载**。
 
 ```VHDL
 LIBRARY IEEE;
@@ -546,13 +547,198 @@ ARCHITECTURE bhv OF adder8 IS
 	END ARCHITECTURE bhv;
 ````
 
+#### 操作符
+
+操作数数据类型必须满足要求，且操作符间的操作数必须是相同的数据类型。操作符的优先级。
+
+`NOT` `ABS` `**` > `*` `/` `MOD` `REM` > 正号 `+` 负号`-` > `+` `-` `&` > `SLL` `SLA` `SRL` `SRA` `ROL` `ROR` > `=` `/=` `<` `<=` `>` `>=` > `AND` `OR` `NAND` `NOR` `XOR` `XNOR`。
+
+**算术操作符**
+
+| 操作符 | 功能 | 操作数数据类型 |
+| :--: | :--: | :--: |
+| `+` | 加 | 整数 |
+| `-` | 减 | 整数 |
+| `*` | 乘 | 整数、实数 |
+| `/` | 除 | 整数、实数 |
+| `&` | 并置 | 一维数组 |
+| `MOD` | 取模 | 整数 |
+| `REM` | 取余 | 整数 |
+| `SLL` | 逻辑左移 | `BIT`、`BIT_VECTOR`、布尔型 |
+| `SRL` | 逻辑右移 | `BIT`、`BIT_VECTOR`、布尔型 |
+| `SLA` | 算术左移 | `BIT`、`BIT_VECTOR`、布尔型 |
+| `SRA` | 算术右移 | `BIT`、`BIT_VECTOR`、布尔型 |
+| `ROL` | 逻辑循环左移 | `BIT`、`BIT_VECTOR`、布尔型 |
+| `ROR` | 逻辑循环右移 | `BIT`、`BIT_VECTOR`、布尔型 |
+| `**` | 乘方 | 整数 |
+| `ABS` | 取绝对值 | 整数 |
+
+**关系操作符**
+
+| 操作符 | 功能 | 操作数数据类型 |
+| :--: | :--: | :--: |
+| `=` | 等于 | 任何数据类型 |
+| `/=` | 不等于 | 任何数据类型 |
+| `<` | 小于 | 枚举、整数 |
+| `>` | 大于 | 枚举、整数 |
+| `<=` | 小于等于 | 枚举、整数 |
+| `>=` | 大于等于 | 枚举、整数 |
+
+**逻辑操作符**
+
+| 操作符 | 功能 | 操作数数据类型 |
+| :--: | :--: | :--: |
+| `AND` | 与 | `BIT`、`BOOLEAN`、`STD_LOGIC` |
+| `OR` | 或 | `BIT`、`BOOLEAN`、`STD_LOGIC` |
+| `NAND` | 与非 | `BIT`、`BOOLEAN`、`STD_LOGIC` |
+| `NOR` | 或非 | `BIT`、`BOOLEAN`、`STD_LOGIC` |
+| `XOR` | 异或 | `BIT`、`BOOLEAN`、`STD_LOGIC` |
+| `XNOR` | 同或 | `BIT`、`BOOLEAN`、`STD_LOGIC` |
+| `NOT` | 非 | `BIT`、`BOOLEAN`、`STD_LOGIC` |
+
+**符号操作符**
+
+| 操作符 | 功能 | 操作数数据类型 |
+| :--: | :--: | :--: |
+| `+` | 正 | 整数 |
+| `-` | 负 | 整数 |
+
+#### 统计 8 位位矢中含 `'1'` 的个数
+
+```VHDL
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+ENTITY CNT1 IS
+	PORT(DIN: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+	     CNT: OUT STD_LOGIC_VECTOR(3 DOWNTO 0));
+END ENTITY CNT1;
+
+ARCHITECTURE bhv OF CNTC IS
+	BEGIN PROCESS(DIN)
+			VARIABLE Q: STD_LOGIC_VECTOR(3 DOWNTO 0);
+			BEGIN
+				Q := "0000";
+				FOR N IN 0 TO 7 LOOP
+					IF (DIN(N) = '1') THEN Q := Q + 1;
+					END IF;
+				END LOOP;
+				CNTH <= Q;
+			END PROCESS;
+	END BHV; 
+```
+
+- **`VARIABLE`**：变量数据类型，作为数据的暂存单元，赋值符号为 `:=`，定义位置在 `PROCESS` 语句内部。
+
+- **循环语句**
+
+```VHDL
+-- 第一种方式
+[LOOP标号: ] FOR 循环变量 IN 循环次数范围 LOOP
+								循环语句
+						END LOOP [LOOP标号];
+						
+-- e.g.
+FOR N IN 0 TO 7 LOOP
+	IF (DIN(N) = '1') THEN Q := Q + 1;
+	END IF;
+END LOOP;
+
+-- 第二种方式
+[LOOP标号: ] LOOP
+							循环语句
+						END LOOP [LOOP标号];
+
+-- e.g.
+L2: LOOP
+			a := a + 1;
+			EXIT L2 WHEN a > 10;
+		END LOOP L2;
+```
+
+#### 乘法器
+
+计算两个位数相等的数相乘后的结果，如下是 `4 * 4` 乘法器的代码样例。
+
+```VHDL
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+USE IEEE.STD_LOGIC_ARITH.ALL;
+ENTITY MULT4B IS
+	GENERIC(S: INTEGER := 4); -- 定义类属参数 S
+	PORT(A, B: IN STD_LOGIC_VECTOR(S DOWNTO 1);
+	     		R: OUT STD_LOGIC_VECTOR(2 * S DOWNTO 1));
+END ENTITY MULT4B;
+
+ARCHITECTURE BHV OF MULT4B IS
+	SIGNAL A0: STD_LOGIC_VECTOR(2 * S DOWNTO 1);
+	BEGIN
+		A0 <= CONV_STD_LOGIC_VECTOR(0, S) & A; -- 将整数 0 变成 S 位二进制数
+		PROCESS(A, B)
+			VARIABLE R1: STD_LOGIC_VECTOR(2 * S DOWNTO 1);
+			BEGIN
+				R1 := (OTHERS => '0'); -- 使用省略操作符: (OTHERS => '0'), 使得 R1 的每一位都是 0
+				FOR I IN 1 TO S LOOP
+					IF (B(I) = '1') THEN
+						R1 := R1 + TO_STDLOGICVECTOR(TO_BITVECTOR(A0) SLL (I - 1)); -- 左移数据类型须是 BIT_VECTOR
+					END IF;
+				END LOOP;
+			R <= R1;
+```
+
+利用 `4 * 4` 乘法器来完成 `8 * 8` 乘法器的设计。
+
+```VHDL
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+ENTITY MULT8B IS
+	PORT(D1, D2: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+						Q: OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+END ENTITY MULT8B;
+
+ARCHITECTURE BHV OF MULT8B IS
+	COMPONENT MULT4B
+		GENERIC(S: INTEGER);
+		PORT(R: OUT STD_LOGIC_VECTOR(2 * S DOWNTO 1);
+			A, B: IN STD_LOGIC_VECTOR(S DOWNTO 1));
+		END COMPONENT;
+	BEGIN
+		U1: MULT4B GENERIC MAP(S => 8)
+							 PORT MAP(R => Q, A => D1, B => D2);
+	END
+```
+
+**`GENERIC` 参数传递语句**
+
+**定义** 部分需要放在 **实体的说明语句部分**，`GENERIC` 语句在所定义参数类似于端口 `PORT`，从外部动态地接受赋值，从而 **改变电路内部规模或结构**。
+
+```VHDL
+GENERIC(常数名1: 数据类型[:= 设定值];
+ 				...
+ 				常数名n: 数据类型[:= 设定值]);
+```
+
+**映射** 部分可用于设计从外部端口改变元件内部参数或结构规模的元件（类属元件）。
+
+```VHDL
+例化名: 元件名 GENERICE MAP(类属表)
+```
+
+
 ## 参考链接
 
 [EDA b站教程](https://www.bilibili.com/video/BV1rK411W717?p=1)
+
 [Verilog 教程](https://www.runoob.com/w3cnote/verilog-tutorial.html)
+
 [ABC](https://people.eecs.berkeley.edu/~alanmi/abc/)
+
 [EPFL](https://www.epfl.ch/labs/lsi/page-102566-en-html/benchmarks/)
+
 [EPFL - GitHub](https://github.com/WilliamX1/benchmarks)
+
 [谷歌布局布线开源论文](https://abopen.com/news/google-research-releases-circuit-training-an-open-source-framework-for-automated-chip-floorplanning/)
+
 [谷歌布局布线开源论文 - GitHub](https://github.com/google-research/circuit_training)
 
