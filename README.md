@@ -17,6 +17,10 @@
 		- [1 位全加器](#1-位全加器)
 		- [8 位加法器](#8-位加法器) 
 		- [乘法器](#乘法器)
+		- [多功能 D 触发器](#多功能-D-触发器)
+		- [锁存器](#锁存器)
+		- [移位寄存器](#移位寄存器)
+		- [4 位二进制加法计数器](4-位二进制加法计数器)
 - [参考链接](#参考链接)
 
 ## Verilog 学习
@@ -725,6 +729,154 @@ GENERIC(常数名1: 数据类型[:= 设定值];
 例化名: 元件名 GENERICE MAP(类属表)
 ```
 
+#### 多功能 D 触发器
+
+时序电路，用于检测上升沿信号。
+
+```VHDL
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+ENTITY DFF2 IS
+	PORT(CLK, RST, EN, D: IN STD_LOGIC;
+			 Q: OUT STD_LOGIC);
+END ENTITY DFF2;
+
+ARCHITECTURE BHV OF DFF2 IS
+	SIGNAL Q1: STD_LOGIC;
+	BEGIN PROCESS(CLK, Q1, RST, EN)
+		BEGIN IF RST = '1' THEN Q1 <= '0'; -- 异步清零，独立于 CLK 控制
+		ELSIF CLK'EVENT AND CLK='1' THEN
+			IF EN = '1' THEN Q1 <= D; END IF; -- 时钟使能
+		END IF;
+	END PROCESS;
+	Q <= Q1;
+END BHV;
+```
+
+- **边沿检测语句**
+
+用于检测时钟信号变化，分为 **上升沿** 和 **下降沿**。
+
+```VHDL
+1. CLK'EVENT AND (CLK = '1') -- 上升沿
+   CLK'EVENT AND (CLK = '0') -- 下降沿
+2. CLK = '1' AND (CLK'LAST_VALUE = '0') -- 上升沿
+   CLK = '0' AND (CLK'LAST_VALUE = '1') -- 下降沿
+3. RISING_EDGE(CLK) -- 上升沿 
+   FALLING_EDGE(CLK) -- 下降沿
+4. WAIT UNTIL CLK = '1' -- 上升沿
+   WAIT UNTIL CLK = '0' -- 下降沿
+```
+
+#### 锁存器
+
+当时钟周期信号 `CLK` 高电平时，`Q` 的值随 `D` 的值变化而变化。低电平时 `Q` 值保持不变。（增加异步复位 `RST`，即当 `RST = '1'` 时，`Q` 的值一定变成 `'0'`）。
+
+```VHDL
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+ENTITY LTCH IS
+	PORT(CLK, D, RST: IN STD_LOGIC;
+			 Q: OUT STD_LOGIC);
+END LTCH;
+
+ARCHITECTURE BHV OF LTCH IS
+	SIGNAL Q1: STD_LOGIC;
+	BEGIN PROCESS(CLK, Q1)
+		BEGIN
+			IF RST = '1' THEN Q1 <= '0';
+			ELSIF CLK = '1' THEN Q1 <= D;
+			END IF;
+		END PROCESS;
+	Q <= Q1;
+END BHV;
+```
+
+#### 移位寄存器
+
+一个输入时钟信号 `CLK`，一个数据装载信号 `LOAD`，一个装载数据 `DIN`，一个串行输出数据 `QB`，一个并行输出数据 `COUT`。
+
+以下是一个 8 位左移移位寄存器的 VHDL 设计。
+
+```VHDL
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+ENTITY SHFT IS
+	PORT(CLK, LOAD: IN STD_LOGIC;
+			 QB: OUT STD_LOGIC;
+			 DIN: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+			 DOUT: OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
+END SHFT;
+
+ARCHITECTURE BHV OF SHFT IS
+	SIGNAL REG8: STD_LOGIC_VECTOR(7 DOWNTO 0);
+	BEGIN 
+		PROCESS(CLK, LOAD)
+			BEGIN
+				IF CLK'EVENT AND CLK = '1' THEN 
+					IF LOAD = '1' THEN REG8 <= DIN;
+					ELSE REG8(7 DOWNTO 1) <= REG8(6 DOWNTO 0);
+					END IF;
+				END IF;
+		END PROCESS;
+		QB <= REG8(7);
+		DOUT <= REG8;
+	END BHV;
+```
+
+左移：低位赋值给高位，最低位保持不变。
+
+```VHDL
+REG8(7 DOWNTO 1) <= REG8(6 DOWNTO 0)
+```
+
+右移：高位赋值给低位，最高位保持不变。
+
+```VHDL
+REG8(6 DOWNTO 0) <= REG8(7 DOWNTO 1)
+```
+
+循环左移：低位赋值给高位，最高位赋值给最低位，并行执行。
+
+```VHDL
+REG8(0) <= REG8(7)
+REG8(7 DOWNTO 1) <= REG8(6 DOWNTO 0)
+```
+
+循环右移：高位赋值给低位，最低位赋值给最高位，并行执行。
+
+```VHDL
+REG8(7) <= REG8(0)
+REG8(6 DOWNTO 0) <= REG8(7 DOWNTO 1)
+```
+
+#### 4 位二进制加法计数器
+
+统计输入时钟信号 `CLK` 的上升沿个数，并输出成一个数据信号 `Q`。
+
+```VHDL
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+ENTITY CNT4 IS
+	PORT(CLK: IN BIT;
+			 Q: BUFFER STD_LOGIC_VECTOR(3 DOWNTO 0));
+END ENTITY CNT4;
+
+ARCHITECTURE BHV OF CNT4 IS
+	BEGIN
+		PROCESS(CLK)
+			BEGIN
+				IF CLK'EVENT AND CLK = '1' THEN
+					Q <= Q + 1;
+				END IF;
+		END PROCESS;
+END BHV;
+```
+
+- **端口模式 `BUFFER`**
+
+既是输出端，又是输入端。可以作为赋值符号的左右操作数同时使用。
 
 ## 参考链接
 
