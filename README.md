@@ -20,7 +20,15 @@
 		- [多功能 D 触发器](#多功能-D-触发器)
 		- [锁存器](#锁存器)
 		- [移位寄存器](#移位寄存器)
-		- [4 位二进制加法计数器](4-位二进制加法计数器)
+		- [4 位二进制加法计数器](#4-位二进制加法计数器)
+		- [4 位二进制减法计数器](#4-位二进制减法计数器)
+		- [实用计数器](#实用计数器)
+	- [含高阻态输出电路设计](#含高阻态输出电路设计)
+		- [三态门](#三态门)
+		- [双向端口](#双向端口)
+		- [三态总线](#三态总线)
+	- [VHDL 描述风格](#VHDL-描述风格) 
+	- [VHDL 用户自定义数据类型](#VHDL-用户自定义数据类型)
 - [参考链接](#参考链接)
 
 ## Verilog 学习
@@ -877,6 +885,218 @@ END BHV;
 - **端口模式 `BUFFER`**
 
 既是输出端，又是输入端。可以作为赋值符号的左右操作数同时使用。
+
+#### 4 位二进制减法计数器
+
+当输入时钟信号 `CLK` 是上升沿时刻时，输出信号 `Q` 的值减一。当 `Q = "0000"` 时，下一个上升沿之后的值为 `"1111"`。
+
+```VHDL
+...
+ENTITY CNT4J IS
+	PORT(CLK: IN BIT;
+			 Q: OUT STD_LOGIC_VECTOR(3 DOWNTO 0));
+END ENTITY CNT4J;
+ARCHITECTURE BHV OF CNT4J IS
+	SIGNAL Q1: STD_LOGIC_VECTOR(3 DOWNTO 0);
+	BEGIN
+		PROCESS(CLK) BEGIN
+			IF CLK'EVENT AND CLK = '1' THEN Q1 <= Q1 - 1;
+			END IF;
+		END PROCESS;
+		Q <= Q1;
+	END BHV;
+```
+
+- **计数器分类**
+
+按 **数值** 分为 **二进制计数器**、**十进制计数器** 和 **N 进制计数器**。
+
+按 **计数方式** 分为 **加法计数器**、**减法计数器** 和 **可逆计数**。
+
+按 **时钟控制** 分为 **同步计数器** 和 **异步计数器**。
+
+#### 实用计数器
+
+一个异步复位输入信号 `RST`，一个时钟输入信号 `CLK`，一个时钟使能输入信号 `EN`，一个同步使能数据装载输入信号 `LOAD`，一个计数值输出信号 `Q` 和一个计数进位输出信号 `COUT`。
+
+```VHDL
+...
+ENTITY COUNT10 IS
+	PORT(CLK, RST, EN, LOAD: IN STD_LOGIC;
+			 DATA: IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+			 DOUT: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+			 COUT: OUT STD_LOGIC);
+END ENTITY COUNT10;
+
+ARCHITECTURE BHV OF COUNT10 BEGIN
+	PROCESS(CLK, RST, EN, LOAD)
+		VARIABLE Q: STD_LOGIC_VECTOR(3 DOWNTO 0);
+		BEGIN
+			IF RST = '0' THEN Q := (OTHERS => '0');
+			ELSIF CLK'EVENT AND CLK = '1' THEN
+				IF EN = '1' THEN
+					IF LOAD = '0' THEN Q := DATA;
+					ELSE
+						IF Q < 9 THEN Q := Q + 1;
+						ELSE Q := (OTHERS => '0');
+						END IF;
+					END IF;
+				END IF;
+			END IF;
+			IF Q = "1001" THEN COUT <= '1';
+			ELSE COUT <= '0';
+			END IF;
+			DOUT <= Q;
+		END PROCESS;
+	END BHV;
+```
+
+### 含高阻态输出电路 VHDL 设计
+
+理论上 **高阻态** 是对地或对电源电阻极大的状态。而实际应用上与引脚的悬空（断开）几乎是一样的。
+
+#### 三态门
+
+真值表是。（`A = X` 代表 `A` 的值无论是多少，只要 `EN = 0`，`Y = Z` 恒成立）。
+
+| A | EN | Y |
+| :--: | :--: | :--: |
+| 1 | 1 | 1 |
+| 0 | 1 | 0 |
+| X | 0 | Z |
+
+```VHDL
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+ENTITY tri_s IS
+	PORT(enable: IN STD_LOGIC;
+			 datain: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+			 dataout: OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
+END ENTITY tri_s;
+
+ARCHITECTURE bhv OF tri_s IS
+	BEGIN
+		PROCESS(enable, datain)
+			BEGIN
+				IF enable = '1' THEN dataout <= datain;
+				ELSE dataout <= "ZZZZZZZZ"; -- Z 必须大写
+				END IF;
+		END PROCESS;
+	END bhv;
+```
+
+#### 双向端口
+
+当一个端口是 **输入模式** 时，其 **输出模式** 的电路部分须呈 **高阻态**。
+
+```VHDL
+...
+ENTITY tri_state IS
+	PORT(control: IN STD_LOGIC;
+			 in1: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+			 q: INOUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+			 x: OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
+END ENTITY tri_state;
+
+ARCHITECTURE BHV OF tri_state IS
+	BEGIN
+		PROCESS(control, q, in1)
+			BEGIN
+				IF control = '0' THEN x <= q; q <= "ZZZZZZZZ"; -- q 作为输出端呈高阻态
+				ELSE q <= in1; x <= "ZZZZZZZZ"; -- x 输出呈高阻态
+				END IF;
+			END PROCESS;
+	END BHV;
+```
+
+#### 三态总线
+
+多路输入信号共用一个总线输出，且同一时刻仅允许一路输入信号通过总线输出，其他路输入信号须全部断开（高阻态）。
+
+以 4 路三态总线为例。端口都属于 "信号" 数据对象，在进程 `PROCESS` 中，对同一信号赋值，只有 **最后一句** 赋值语句有效。
+
+```VHDL
+...
+-- 完全错误，没有并行执行。
+-- 且只有最后一句 output <= (OTHERS => 'Z') 有效。
+IF enable = "00" THEN output <= input3;
+ELSE output <= (OTHERS => 'Z');
+END IF;
+IF enable = "01" THEN output <= input2;
+ELSE output <= (OTHERS => 'Z');
+END IF;
+...
+-- 多个 PROCESS，可以并行执行。
+COM3: PROCESS(enable, input3) BEGIN
+	IF enable = "00" THEN output <= input3;
+	ELSE output <= (OTHERS => 'Z');
+	END IF;
+END PROCESS;
+COM2: ...
+```
+
+也可以采用 `WHEN-ELSE` 并行语句来完成。每一个并行语句相当于一个 **独立** 的进程语句。**建议采用**。
+
+```VHDL
+ARCHITECTURE BHV OF tri2 IS
+	BEGIN
+		output <= input3 WHEN enable = "00" ELSE (OTHERS => 'Z');
+		output <= input2 WHEN enable = "01" ELSE (OTHERS => 'Z');
+		...
+	END BHV;
+```
+
+### VHDL 描述风格
+
+- **行为描述**
+
+依据希望的功能，程序仅仅描述 **输入与输出之间的转换行为**，不存在任何与 **硬件选择**、**硬件连线** 等相关的语句。
+
+通常是指含有 **进程（顺序语句）** 的非结构化描述。
+
+- **数据流描述**
+
+直观表达 **电路内部的逻辑结构**（逻辑关系表达式）。使用 **非结构化的并行语句** 描述和 **连续赋值语句**。
+
+- **结构描述**
+
+描述元件组成及之间的互连。基于 **元件例化语句** 实现。
+
+### VHDL 用户自定义数据类型
+
+- **限定型数组型数据类型**：将一组具有相同数据类型的元素集合在一起构成的新的数据类型。
+
+```VHDL
+TYPE 数组名 IS ARRAY(数组范围) OF 基本数据类型;
+e.g.
+TYPE MATRIX IS ARRAY(127 DOWNTO 0) OF STD_LOGIC_VECTOR(7 DOWNTO 0);
+```
+
+- **非限定型数组型数据类型**：不定义数据下标取值范围。
+
+```VHDL
+TYPE 数组名 IS ARRAY(数组下标名 RANGE <>) OF 数据类型;
+e.g.
+TYPE BIT_VECTOR IS ARRAY(NATURAL RANGE<>) OF BIT;
+```
+
+- **枚举型数据类型**：明确取值范围。
+
+```VHDL
+TYPE 数组类型名 IS 数据类型定义表述;
+e.g.
+TYPE my_logic IS ('1', 'Z', 'U', '0');
+SIGNAL s1: my_logic;
+s1 <= 'Z';
+```
+
+- **枚举型子类型数据类型**：TYPE 所定义的原数据类型中的一个子集。
+
+```VHDL
+SUBTYPE 子类型名 IS 基本数据类型 RANGE 约束范围;
+e.g.
+SUBTYPE digits IS INTEGER RANGE 0 to 9;
+```
 
 ## 参考链接
 
