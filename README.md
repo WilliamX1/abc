@@ -29,6 +29,7 @@
 		- [三态总线](#三态总线)
 	- [VHDL 描述风格](#VHDL-描述风格) 
 	- [VHDL 用户自定义数据类型](#VHDL-用户自定义数据类型)
+- [ASIC 学习](#ASIC-学习) 
 - [参考链接](#参考链接)
 
 ## Verilog 学习
@@ -188,6 +189,8 @@ assign Z = A & B;
 在 `initial` 或 `always` 语句块中的赋值是 **过程赋值**，分为 **阻塞赋值**`=`，即顺序执行，多用于`initial` 中。 和 **非阻塞赋值**`<=`，即并行执行，多用于 `always` 中。
 
 ## 数字电路设计学习
+
+补课级俗称学习，参考 [b 站清华大学王红主讲的数字电子技术基础](https://www.bilibili.com/video/BV18p411Z7ce?from=search&seid=8537299704075032482&spm_id_from=333.337.0.0)。
 
 ## EDA 学习
 
@@ -1098,6 +1101,10 @@ e.g.
 SUBTYPE digits IS INTEGER RANGE 0 to 9;
 ```
 
+## ASIC 学习
+
+主要参考 [密院教程](./doc/Design Flow)
+
 ## 参考链接
 
 [EDA b站教程](https://www.bilibili.com/video/BV1rK411W717?p=1)
@@ -1113,4 +1120,8 @@ SUBTYPE digits IS INTEGER RANGE 0 to 9;
 [谷歌布局布线开源论文](https://abopen.com/news/google-research-releases-circuit-training-an-open-source-framework-for-automated-chip-floorplanning/)
 
 [谷歌布局布线开源论文 - GitHub](https://github.com/google-research/circuit_training)
+
+[详解ASIC设计流程](https://zhuanlan.zhihu.com/p/145714992)
+
+[b 站四川大学可编程ASIC设计](https://www.bilibili.com/video/BV1vE411M74c?t=105.9)
 
