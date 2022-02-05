@@ -6,6 +6,7 @@
 - [ABC 工具学习](#ABC-工具学习)
 - [Verilog 学习](#Verilog-学习)
 - [数字电路设计学习](#数字电路设计学习)
+- [EPFL](#EPFL)
 - [EDA 学习](#EDA-学习)
 	- [EDA 设计流程](#EDA-设计流程)
 	- [EDA 工具](#EDA-工具)
@@ -205,7 +206,138 @@ assign Z = A & B;
 
 ## 数字电路设计学习
 
-补课级俗称学习，参考 [b 站清华大学王红主讲的数字电子技术基础](https://www.bilibili.com/video/BV18p411Z7ce?from=search&seid=8537299704075032482&spm_id_from=333.337.0.0)。
+补课级速成学习，参考 [b 站清华大学王红主讲的数字电子技术基础](https://www.bilibili.com/video/BV18p411Z7ce?from=search&seid=8537299704075032482&spm_id_from=333.337.0.0)。
+
+## EPFL
+
+参考论文 [The EPFL Combinational Benchmark Suite](file:///Users/huid/Downloads/IWLS15.pdf)
+
+### 背景
+
+EDA 计算机辅助设计非常依赖于 **基准测试（benchmark）** 来评估和提升软件性能，而常用的基准测试主要分为 **组合电路基准测试（Combinational benchmark）** 和 **时序电路基准测试** 两种。
+
+组合电路是 **纯布尔函数**，而时序电路则包含了组合电路和存储元件，理论上来说时序电路可以描述任何的数字系统。
+
+但是常用的学术型优化工具往往都是针对 **组合电路** 进行优化的，因为
+
+- **底层优化方法** 本质上是为组合逻辑设计的。
+- 处理时序电路会给软件 **增加代码复杂度**。
+- 对时序电路的优化最终会 **转化成** 对组合电路的优化。
+
+因此，EPFL 就是要为 **组合电路的优化工具** 提供一系列 **基准测试**。现有的基准测试主要面临以下 **问题**
+
+- IO 数量比例失衡。
+- 原生组合电路已经过时。
+- 原始功能描述缺失，导致难以从结果得出结论。
+- 不受限制的 `HDL` 格式的基准测试难以阅读，通用的 `HDL` 解释器比优化代码本身更复杂。
+- EDA 供应商所使用的基准往往来自于客户，且通常是保密的。
+- 研究人员则使用自定义基准来测试，更加难以比较工具间的优劣。
+
+而 EPFL 则拥有以下 **特点**
+
+- 所有基准测试都是 **原生组合** 的。
+- 所有基准测试都提供 `Verilog`，`VHDL`，`BLIF` 和 `AIGER` 格式文件，而 `HDL` 格式文件有严格规范以降低它的复杂度。
+- 共有 `arithmetic`，`random/control` 和 `very large` 三种类型的基准测试。
+- 基准测试 **复杂度多样**，有不同数量级门的等效电路可供使用。
+- 每个基准测试都有 **功能说明**。
+
+### 主要内容
+
+EPFL 共提供 3 种类型共 23 个基准测试，分为 `arithmetic`，`random/control` 和 `More than ten Millon` 三种类型。
+
+#### Arithmetic Benchmarks
+
+共有 10 个算术类型的基准测试，以下是经过 **初步优化** 后得到的较好的结果，可以用来检测你的优化工具的性能。
+
+![EPFL-1](./README/EPFL-1.png)
+
+1. $Adder$：二进制加法器，标准的 2 个二进制数加法，$a$，$b$ 和 $f$ 都是 128 `bit` 的信号，而 $cOut$ 是 1 `bit` 代表进位。
+
+$$
+\{cOut, f\} = a + b
+$$
+
+2. $Barrel \ shifter$：有边界的右移，$a$ 和 $result$ 都是 128 `bit`，而 $shift$ 是一个 7 `bit` 的信号，用来表示移位的位数，范围从 $0$ 到 $2 ^ 7 - 1$。
+
+$$
+result = \text{right\_shift}(a, shift)
+$$
+
+3. $Divisor$：无符号整数除法，所有信号都是 64 `bit`。
+
+$$
+a = b \cdot quotient + remainder
+$$
+
+4. $Hypotenuse$：以两个输入为直角边来计算斜边的长度。所有信号都是 128 `bit`。
+
+$$
+hypotenuse = \sqrt{a^2 + b^2}
+$$
+
+5. $Log2$：对数计算，所有信号都是 32 `bit`。
+
+$$
+result = \log_2(a)
+$$
+
+6. $Max$：计算 4 个数中的最大值和对应的位置。
+
+$$
+result = max{in0, in1, in2, in3} \\
+address = \text{position}(result) \\
+$$
+
+7. $Multiplier$：二进制乘法器，标准的 2 个二进制数相乘，输入信号 $a$ 和 $b$ 是 64 `bit`，输出信号 $f$ 是 128 `bit`。
+
+$$
+f = a \cdot b
+$$
+
+8. $Sine$：数学运算 $\sin$。输入信号 $a$ 是 24 `bit`，输出信号 $sin$ 是 25 `bit`。
+
+$$
+sin = sin(a)
+$$
+
+9. $Square-root$：数学运算 开根号。输入信号 $a$ 是 128 `bit`，输出信号 $asqrt$ 是 64 `bit`。
+
+$$
+asqrt = \sqrt{a}
+$$
+
+10. $Square$：数学运算 平方。输入信号 $a$ 是 64 `bit`，输出信号 $asquared$ 是 128 `bit`。
+
+$$
+asquared = a ^ 2
+$$
+
+#### Random/Control Benchmarks
+
+由各种类型的控制器（controllers）、仲裁器（arbiters）、路由器（routers）、转换器（converters）、解码器（decoders）、投票器（voters）和随机函数（random functions）组成。
+
+![EPFL-2](./README/EPFL-2.png)
+
+1. $Round\text{-}robin \ arbiter$：考虑到公平性的一种仲裁算法，即优先级不固定，具体可参考 [Round robin arbitration](https://rtlery.com/articles/round-robin-arbitration)
+2. $Alu \ control \ unit$：算术逻辑单元 $ALU$ 执行算术与逻辑运算相关的所有进程，而控制单元是处理器大脑，需要向所有事物发出命令并确保产生最佳结果。
+3. $Coding-cavlc$：是针对 `H.264` 格式视频编码器的加密方式。具体可参考 [Context-adaptive variable-length coding](https://en.wikipedia.org/wiki/Context-adaptive_variable-length_coding)
+4. $Decoder$：传统的解码器。
+5. $i2c \ controller$：总线控制协议，根据论文设计的，太复杂了。
+6. $Int \ to \ float \ converter$：将整型数转换成浮点数，输入信号是 10 `bit` 二进制信号 $B$，输出信号是 4 `bit` 尾数信号 $M$ 和 3 `bit` 指数信号 `E`。
+7. $Memory \ controller$：根据论文设计的，太复杂了。
+8. $Priority \ encoder$：标准的优先编码器，将 `128` 位二进制输入压缩编码成 `7` 位，还有 `1` 位代表输入数据是否合法。
+9. $Lookahead \ XY \ router$：一种低延迟，高带宽的路由算法。
+10. $Voter$：投票器。
+
+#### MtM Benchmarks
+
+_More than ten Million gates (MtM)_ 是为了检验工具的高容量能力，输入都非常大。
+
+![EPFL-3](./README/EPFL-3.png)
+
+### 总结
+
+EPFL 提供 23 份实现了一定功能的代码文件，我们可以使用诸如 `abc` 这样的逻辑综合优化工具对其分别进行优化，优化后的 `depth` 和 `level` 越少越好。EPFL 提供了经过基本优化后的结果用以参考优化工具的性能，且不同的基准测试也能检测出优化工具的不同性能好坏，例如 `高质量` 和 `高速` 等。
 
 ## EDA 学习
 
