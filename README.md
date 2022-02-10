@@ -368,6 +368,71 @@ EPFL 提供 23 份实现了一定功能的代码文件，我们可以使用诸�
 
 [逻辑综合博士论文](./doc/逻辑综合博士论文.pdf)
 
+`ABC tool: an indestrial-strengh academic tool comprising state-of-the-art algorithms for logic synthesis and verification`
+
+**缩写**
+
+- AIG: AND-Inverter Graph.
+- ASIC: Application Specific Integrated Circuit.
+- BDD: Binary Decision Diagram.
+- CAD: Computer Aided Design.
+- CEC: Combinational Equivalence Checking.
+- DAG: Directed Acyclic Graph.
+- DFS: Depth-First Search.
+- DSD: Disjoint-Support Decomposition.
+- EDA: Electronic Design Antomation.
+- FPGA: Field-Programmable Gate Array.
+- HDL: Hardware Description Language.
+- LUT: Look-Up Table.
+- MFFC: Maximum Fanout-Free Cone.
+- MIG: Majority-Inverter Graph.
+- NPN: Negation-Permutaion-Negation.
+- POS: Product-Of-Sums.
+- QoR: Quality-of-Results.
+- ROBDD: Reduced-Ordered Binary Decision Diagram.
+- SAT: Satisfiability.
+- SoC: System-on-Chip.
+- SOP: Sum-Of-Products.
+- TFI: Transitive Fanin.
+- TFO: Transitive Fanout.
+- VLSI: Very-Large Scale Integration.
+
+### 1. 简介
+
+#### 1.1 问题定义
+
+未来大规模电路会包含数十亿以上的 **逻辑门**，所以 **高效的**、**拓展性高** 的 EDA 算法在电路设计的各个阶段都非常重要。
+
+这篇文章主要关注以下三个问题。
+
+- _Multi-Level Logic Optimization Problem_。
+以最小化 **代价函数 $\sigma$ **为目标，将原先的逻辑网络（DAG 表示）$N$ 转换成 **相等的** 逻辑网络 $N'$。代价函数 $\sigma$ 由 DAG 图中的 **节点** 和 **层数** 进行表示，与电路的 **面积** 和 **延迟** 有关。
+
+- _LUT-Besed Technology Mapping Problem_。
+在满足给定的 **设计约束 $\phi$ **，以最小化给定的 **代价函数 $\alpha$ **为目标，将原先的逻辑网络 $N'$ 转换成 **k 个变量输入** 的逻辑网络 $N''$。通常，**尽可能少使用 LUT** 且须满足 **时间延迟约束**。
+
+- _Combinational Equivalence Checking Problem_。
+验证逻辑网络 $N$ 和 $N'$ 是不是 **在功能上相等**。通常，其中一个网络是未经优化的，另一个网络是经过了 _Multi-Level Logic Optimization_ 和 _LUT-Besed Technology Mapping_ 两次优化后得到的新网络，通常在第一次优化后就会进行 **功能验证** 以确保下一次优化的输入正确性。
+
+在经过了这两种优化后，且功能验证通过后，才会进入到 **物理逻辑综合阶段**，例如 **布局和布线步骤**。
+
+#### 1.2 举例说明
+
+举例说明在 **逻辑综合和验证阶段**，**运行时**、**可拓展性** 和 **结果质量** 这三个方面的难点。
+
+- _Motivation on Multi-Level Logic Optimization_
+逻辑重写（_logic rewriting_) 从 **预先计算好的子图表** 中检索到更好的表示来 **逐步替换** 逻辑网络的子图。例如 _ABC_ 中的指令 `rewrite`。
+
+- _Motivation on LUT-Based Technology Mapping_
+多级逻辑优化的效果会直接影响技术映射的质量。面向区域的逻辑优化旨在减少 AIG 图中节点的数量，而基于 LUT 的技术映射旨在减少映射的网表中 LUT 的数量从而减少电路的面积。然而 AIG 图中节点数量越多，可以减少的 LUT 数量就越多，因此需要在这两者之间找到一个临界点。
+
+- _Motivation on Combinational Equivalence Checking_
+CEC 是共同 NP 完全问题，包含了几个可以被建模成 SAT 问题的复杂决策问题。运用 _ABC_ 中 `cec` 命令来验证两个图（14 million 和 9 million）的等价性需要超过 24 小时的时间，效率较低。但 CEC 技术又被很多应用当做一个重要的内置模块在使用，因此非常重要。
+
+
+
+
+
 ## EDA 学习
 
 入门级学习，参考 [b 站教程](https://www.bilibili.com/video/BV1rK411W717?from=search&seid=4605110450993826459&spm_id_from=333.337.0.0)。
