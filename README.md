@@ -3,6 +3,7 @@
 ## 目录
 
 - [目录](#目录)
+- [论文学习](#论文学习)
 - [ABC 工具学习](#ABC-工具学习)
 	- [基础概念](#基础概念)
 		- [超大规模集成电路 (VLSI)](#超大规模集成电路VLSI)
@@ -10,7 +11,7 @@
 		- [反相图 (AIG)](#反相图AIG)
 	- [论文学习 Quick Look under the Hood of ABC](##论文学习-quick-look-under-the-hood-of-abc)
 - [Verilog 学习](#Verilog-学习)
-	- [基础语法]
+	- [基础语法](#基础语法)
 		- [格式](#格式)
 		- [注释](#注释)
 		- [数值种类](#数值种类)
@@ -64,6 +65,49 @@
 	- [VHDL 用户自定义数据类型](#VHDL-用户自定义数据类型)
 - [ASIC 学习](#ASIC-学习) 
 - [参考链接](#参考链接)
+
+## 论文学习
+
+顶会：dac，iccad
+
+### [OpenABC-D: A Large-Scale Dataset For Machine Learning Guided Integrated Circuit Synthesis](https://arxiv.org/pdf/2110.11292.pdf)
+
+
+
+
+[Approximate logic synthesis: A survey](https://par.nsf.gov/servlets/purl/10273073)
+
+[DRiLLS: Deep Reinforcement Learning for Logic Synthesis Optimization (ASPDAC'20)]
+
+[Deep-PowerX: A deep learning-based framework for low-power approximate logic synthesis]
+
+[Flowtune: Practical multi-armed bandits in boolean optimization]
+
+[Berkeley Open MOS dataBase (BOMB): A Dataset for Silicon Technology Representation Learning]
+
+[Autonomous application of netlist transformations inside lagrangian relaxation-based optimization]
+
+[OpenABC-D: A Large-Scale Dataset For Machine Learning Guided Integrated Circuit Synthesis]
+
+[Late Breaking Results: Reinforcement Learning for Scalable Logic Optimization with Graph Neural Networks]
+
+[Hybrid Graph Models for Logic Optimization via Spatio-Temporal Information]
+
+[RL-Guided Runtime-Constrained Heuristic Exploration for Logic Synthesis]
+
+[Approximate Logic Synthesis Using Boolean Matrix Factorization]
+
+[Logic synthesis meets machine learning: Trading exactness for generalization](https://arxiv.org/pdf/2012.02530)
+
+[Logic synthesis for generalization and learning addition]
+
+[Fast logic optimization using decision trees]
+
+[Sampling-Based Approximate Logic Synthesis: An Explainable Machine Learning Approach]
+
+[Resynthesis of logic circuits using machine learning and reconvergent paths]
+
+[港中文教授主页](https://zleonhe.github.io/)
 
 ## ABC 工具学习
 
@@ -1467,4 +1511,6 @@ SUBTYPE digits IS INTEGER RANGE 0 to 9;
 [详解ASIC设计流程](https://zhuanlan.zhihu.com/p/145714992)
 
 [b 站四川大学可编程ASIC设计](https://www.bilibili.com/video/BV1vE411M74c?t=105.9)
+
+[可学习的 EDA 论文](https://reader.elsevier.com/reader/sd/pii/B9780123743640500138?token=814D6729540A063B1B68FB9A862AE865C3C37A0628F1C2C9D3BAFA49A8B9A25AA623F3520407750A7A02BF9DEDD0E7DD&originRegion=us-east-1&originCreation=20220210120407)
 
