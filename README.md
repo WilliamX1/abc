@@ -4,6 +4,7 @@
 
 - [目录](#目录)
 - [论文学习](#论文学习)
+	- [[OpenABC-D: A Large-Scale Dataset For Machine Learning Guided Integrated Circuit Synthesis](#[OpenABC-D-A-Large-Scale-Dataset-For-Machine-Learning-Guided-Integrated-Circuit-Synthesis)
 - [ABC 工具学习](#ABC-工具学习)
 	- [基础概念](#基础概念)
 		- [超大规模集成电路 (VLSI)](#超大规模集成电路VLSI)
@@ -72,8 +73,59 @@
 
 ### [OpenABC-D: A Large-Scale Dataset For Machine Learning Guided Integrated Circuit Synthesis](https://arxiv.org/pdf/2110.11292.pdf)
 
+因为复杂集成电路有很多晶体管，所以手动设计电路不可能，需要借助电子自动设计工具来将顶层的设计转换成底层的布局布线，这样设计人员可以专注于顶层设计例如写 `Verilog` 代码。
 
+**logic synthesis**
 
+Transforms an HDL program into a functionally equivalent graph (netlist) of Boolean logic gates while attempting to minimize metrics such as area, power and delay.
+
+Logic minimization is the simplest, but $\sum^2_p$-Hard.
+
+![OpenABC-D-1](./README/OpenABC-D-1.png)
+
+Usual procedures:
+
+- remove redundant nodes.
+- refactor Boolean formulars.
+- simplify node representations.
+
+**OpenABC-D**
+
+A **realistic** and **feature-rich** dataset which can be used to train ML models and to augment data for other problems in EDA.
+
+**sub-graph optimizations in ABC**
+
+- `Balance (b)`: depth-optimization step to minimize the delay of a disign.
+- `Rewrite (rw, rw -z)`: does template pattern matching on sub-trees and replaces them with equivalent logic functions.
+- `Refactor (rf, rf -z)`: traverses iteratively on all nodes in the netlist, computes maximum fan out free cones and replaces them with equivalent functions if it improves cost. (e.g., reduce number of nodes).
+- `Re-substitution (rs, rs -z)`: representing the logical function of a node using logic functions of existing nodes.
+
+**ML algorithms usage**
+
+- predict synthesis recipe quality.
+- predict the "best" optimizer.
+- predict the best synthesis recipes (reinforcement learning-guided).
+
+#### Data Generation Pipeline
+
+![OpenABC-D-2](./README/OpenABC-D-2.png)
+
+- Use many open-source tools for different purposes on different stages.
+- Perform register transfer level (RTL) synthesis using Yosys.
+- In graph-level processing, generate the GRAPHML format of the design from original BENCH file.
+- In preprocessing for ML, prepare the circuit data for use with any ML framework.
+
+#### OpenABC-D Characteristics
+
+![OpenABC-D-3](./README/OpenABC-D-3.png)
+
+#### Benchmarking Learning on OpenABC-D
+
+The following picture shows an GCN example using OpenABC-D dataset to train ML models.
+
+![OpenABC-D-4](./README/OpenABC-D-4.png)
+
+**Limitations**: There remains a scarcity of industrial-scale open source hardware IPs.
 
 [Approximate logic synthesis: A survey](https://par.nsf.gov/servlets/purl/10273073)
 
