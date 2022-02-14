@@ -127,7 +127,29 @@ The following picture shows an GCN example using OpenABC-D dataset to train ML m
 
 **Limitations**: There remains a scarcity of industrial-scale open source hardware IPs.
 
-[Approximate logic synthesis: A survey](https://par.nsf.gov/servlets/purl/10273073)
+### [Approximate logic synthesis: A survey](https://par.nsf.gov/servlets/purl/10273073)
+
+ALS aims at deriving approximate solutions for any circuit without a priori knowledge of its functionality.
+
+Approximate circuit design techniques:
+
+- **Overscaling** aims at lowering a circuit supply voltage without reducing the correspnding operational frequency, thus reducing its static and dynamic energy while inducing timing errors. But these timing errors may result in uncontrollably large computational errors, limiting the usability of these solutions without redesign techniques.
+- **Functional**. The function implemented by a circuit and/or the corresponding gate-level netlist is simplified, with the purpose of trading accuracy for performance. There exists three main approaches.
+	- _Netlist transformation_. Transform netlists by removing some nodes, or by substituting some wires with others, hence reducing the circuit size and power consumption.
+	- _Boolean rewriting_. Focus on the function truth table, modify the values of such outputs for a subset of the inputs.
+	- _Approximate high-level synthesis_. Foces on the behavioural level such as in RTL Verilog or C language.
+
+![Approximate-logic-synthesis-1](./README/Approximate-logic-synthesis-1.png)
+
+Precise error estimation is important, maily two methods:
+
+- _Error modeling_. Annotating a circuit specification with a notion of error, to estimate how much that transformation will impact on the final result.
+- _QoR evaluation_. Verify whether output quality constraints are satisfied in the synthesized approximate circuit.
+
+#### Methods for Error Estimation
+
+
+
 
 [DRiLLS: Deep Reinforcement Learning for Logic Synthesis Optimization (ASPDAC'20)]
 
@@ -138,8 +160,6 @@ The following picture shows an GCN example using OpenABC-D dataset to train ML m
 [Berkeley Open MOS dataBase (BOMB): A Dataset for Silicon Technology Representation Learning]
 
 [Autonomous application of netlist transformations inside lagrangian relaxation-based optimization]
-
-[OpenABC-D: A Large-Scale Dataset For Machine Learning Guided Integrated Circuit Synthesis]
 
 [Late Breaking Results: Reinforcement Learning for Scalable Logic Optimization with Graph Neural Networks]
 
