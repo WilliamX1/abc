@@ -4,7 +4,8 @@
 
 - [目录](#目录)
 - [论文学习](#论文学习)
-	- [[OpenABC-D: A Large-Scale Dataset For Machine Learning Guided Integrated Circuit Synthesis](#[OpenABC-D-A-Large-Scale-Dataset-For-Machine-Learning-Guided-Integrated-Circuit-Synthesis)
+	- [OpenABC-D: A Large-Scale Dataset For Machine Learning Guided Integrated Circuit Synthesis](#[OpenABC-D-A-Large-Scale-Dataset-For-Machine-Learning-Guided-Integrated-Circuit-Synthesis)
+	- [Approximate logic synthesis: A survey](#[Approximate-logic-synthesis-A-survey])
 - [ABC 工具学习](#ABC-工具学习)
 	- [基础概念](#基础概念)
 		- [超大规模集成电路 (VLSI)](#超大规模集成电路VLSI)
@@ -148,7 +149,65 @@ Precise error estimation is important, maily two methods:
 
 #### Methods for Error Estimation
 
+The key to ALS is **evaluation of the error** induced by a simplification, such as the removal of a gate or the modification of a value in a truth table.
 
+**Error Metrics** for designing approximate circuits
+
+1. Compute the difference $d$ between an exact and approximate implemented Boolean functions.
+$$
+d(f(x), \hat{f}(x)) = \|f(x) - \hat{f}(x)\|
+$$
+2. Difine function $D$ expressing the maximum value of the difference between $f$ and $\hat{f}$.
+$$
+D = \underset{x \in X}{\max}(d(f(x), \hat{f}(x)))
+$$
+3. Construct error metric and error rate.
+$$
+\text{error metric} = \frac{1}{|X|} = \sum_{x \in X}\frac{d(f(x), \hat{f}(x))}{\|f(x)\|} \\
+\text{error rate} = \frac{|\{x \in X | f(x) \neq \hat{f}(x)\}|}{|X|}
+$$
+4. Above take only maximum error, we can also consider average error by replacing function $D$ to $D = \underset{x \in X}{\text{average}}(d(f(x), \hat{f}(x)))$.
+
+**Methods** for _Error Modeling_ and _QoR Evaluation_
+
+Due to the **unaffordable computation** of the error caused by a circuit modification, the methods to efficiently calculate **error estimates** (int the case of average errors and error rates) and **error bounds** (for maximum errors) become necessary. Below are some methods.
+
+- **Average error estimation**. Simulate a circuit for a **subset** of its input, and estimate the error introduced by a set of candidate approximate transformations (ATs) without having to resort to Monte Carlo simulation for each of them.
+
+![Approximate-logic-synthesis-2](./README/Approximate-logic-synthesis-2.png)
+
+- **Bounding maximum errors**. Assigns to each node in a circuit the sum of the significance of all its reachable outputs (where the significance of the output bit $i$ is equal to $2^i$), which is a conservative method. In the stage of **Partition and Propagate (P&P)**, we can assign weights to each node corresponding to a bound on the maximum difference from the exact output if such node is removed and its output set to a constant value, to **fully label a circuit**. And the **computation of weights** by P&P in 4 steps:
+	- **Partitioning**. Divide original DAG into some subgraphs ($I_s$ inputs).
+	- **Derivation of propagation matrics**. By observing the sub-graphs truth tables, generate their propagation matrices $M$. So the relation between a subgraph input weights vector $w_{in}$ and output weights vector $w_{out}$ is $w_{in} = Mw_{out}$.
+	- **Propagation**. Weights are propagated _across_ sub-graphs considering them in _reverse topological order_.
+	- **Subgraph simulations**. The weights are retrieved using exhaustive simulation _separately for each subgraph_.
+
+#### Structural Netlist Transformations in ALS
+
+Grouped by their **adopted strategy**.
+
+- **Greedy Heuristics for Netlist Pruning**.
+	- A set of multiple stuck-at-faults (SAFs) is identifiedm and are injected in the original circuit by assigning a static 0 or a static 1 to each signal of a selected SA0 or SA1 fault. Using two steps to simplify circuit.
+		- **Backward simplification** traverses the circuit from the SAF node towards the primary inputs, marks all nodes whose fanout is now empty as deletable, and eliminates marked nodes.
+		- **Forward simplifications** based on backward simplification, and using the type of SAF to further reduce the logic stemming.
+	- **GLP** iteratively removes a node (low significance, low activity or both) from the original circuit, setting its output to a constant, then resymthesizes the circuit and verify the error threshold, and recomputes SAP for node ranking.
+	![Approximate-logic-synthesis-3](./README/Approximate-logic-synthesis-3.png)
+
+- **Greedy Heuristics for Netlist Manipulation**
+	- **SASIMI (Substitute-And-SIMplIfy)** takes the original circuit and a target error (TS) as input, then iteratively performs the selection of the best candidate signal pair, the substitution and consequent circuit simplificaiton, followed by QoR evaluation until the target error constraint is reached.
+	![Approximate-logic-synthesis-4](./README/Approximate-logic-synthesis-4.png)
+
+- **Stochastic Netlist Transformation**. Iteratively, all mapped sub-netlists are optimised in parallel through iterative random selection of possible transformations. Once the optimised sub-netlists are recomposed, the error of the circuit is assessed through hypothesis testing.
+	![Approximate-logic-synthesis-5](./README/Approximate-logic-synthesis-5.png)
+	
+- **Exhaustive Exploration for Netlist Pruning** resorts to exhaustive exploration of all possible nodes subsets that can be removed from the exact circuit, which is strongly relies on accurate estimation of node significance. It use _Validity_, _Closure_ and _Residual gain_ to reduce the average complextiy of the binary tree search algorithm.
+	![Approximate-logic-synthesis-6](./README/Approximate-logic-synthesis-6.png)
+
+#### Logic Rewriting Based Methods in ALS
+
+**Boolean Rewriting** is a basic approach where the circuit is first captured in a formal Boolean representation and then synthesized to a gate-based netlist. 
+
+- **Logic Rewriting by Boolean Optimization**
 
 
 [DRiLLS: Deep Reinforcement Learning for Logic Synthesis Optimization (ASPDAC'20)]
