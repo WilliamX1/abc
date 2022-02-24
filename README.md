@@ -210,9 +210,40 @@ Grouped by their **adopted strategy**.
 - **Logic Rewriting by Boolean Optimization**
 
 
-[DRiLLS: Deep Reinforcement Learning for Logic Synthesis Optimization (ASPDAC'20)]
+### [DRiLLS: Deep Reinforcement Learning for Logic Synthesis Optimization (ASPDAC'20)](https://arxiv.org/pdf/1911.04021.pdf)
 
-[Deep-PowerX: A deep learning-based framework for low-power approximate logic synthesis]
+![A2C-architecture](./README/A2C-architecture.png)
+
+1. **Design state**, normalization is required for model generalization.
+
+$$
+\text{AIG State} =
+\left[
+\begin{aligned}
+&\text{\# primary I/O}, \\
+&\text{\# nodes}, \\
+&\text{\# edges}, \\
+&\text{\# levels}, \\
+&\text{\# letches}, \\
+&\text{\% ANDs}, \\
+&\text{\% NOTs} \\
+\end{aligned}
+\right]
+$$
+
+2. **Optimization space**, mainly seven primitive transformations, first six target the size reduction of the AIG, the last one reduces the number of levels.
+
+$$
+A = [\text{resub}, \text{resub -z}, \text{rewrite}, \text{rewrite -z}, \text{refactor}, \text{refactor -z}, \text{balance}]
+$$
+
+3. **Reward fuction**, multi-objective for both design area and delay.
+4. **Collecting experiences**, store the synthesis state, the optimization performed and the reward in the pre-initialized variables.
+5. **A2C agent training**, start with discounting the delay rewards over iterations, then compute loss and train the actor and critic networks to minimize the loss.
+
+### [Deep-PowerX: A deep learning-based framework for low-power approximate logic synthesis](https://arxiv.org/pdf/2007.01465.pdf)
+
+
 
 [Flowtune: Practical multi-armed bandits in boolean optimization]
 
