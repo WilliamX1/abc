@@ -6,6 +6,8 @@
 - [论文学习](#论文学习)
 	- [OpenABC-D: A Large-Scale Dataset For Machine Learning Guided Integrated Circuit Synthesis](#[OpenABC-D-A-Large-Scale-Dataset-For-Machine-Learning-Guided-Integrated-Circuit-Synthesis)
 	- [Approximate logic synthesis: A survey](#[Approximate-logic-synthesis-A-survey])
+	- [DRiLLS: Deep Reinforcement Learning for Logic Synthesis Optimization (ASPDAC'20)](#DRiLLS-Deep-Reinforcement-Learning-for-Logic-Synthesis-Optimization-ASPDAC'20)
+	- [Deep-PowerX: A deep learning-based framework for low-power approximate logic synthesis](#Deep-PowerX-A-deep-learning-based-framework-for-low-power-approximate-logic-synthesis)
 - [ABC 工具学习](#ABC-工具学习)
 	- [基础概念](#基础概念)
 		- [超大规模集成电路 (VLSI)](#超大规模集成电路VLSI)
@@ -243,9 +245,45 @@ $$
 
 ### [Deep-PowerX: A deep learning-based framework for low-power approximate logic synthesis](https://arxiv.org/pdf/2007.01465.pdf)
 
+Deep-PowerX generates training data and uses them to train the embedded Deep Neural Network (DNN), which can calculate error rate for an arbitrary netlist fast during the approximation process. After training, it can receive a mapped circuit as input and iteratively traverses the circuit to replace some node and consult with DNN to know whether the error rate is tolerable. Deep-PowerX can optimize power by approximating highest switching nodes and optimize area by replace critical delay path with faster gates.
 
 
-[Flowtune: Practical multi-armed bandits in boolean optimization]
+**Probabilistic Error Propagation**
+
+Every gate has its own error probability calculation formula. For example, a 2-input OR gate.
+
+$$
+\epsilon_{OR} = \epsilon_g + (1 - 2\epsilon_g)(\epsilon_1(1 - p_2) + \epsilon_2(1 - p_1) - 2\epsilon_1\epsilon_2(2p_1p_2 - 1))
+$$
+
+- $\epsilon_g$: intrinsic error probability of a 2-input OR gate.
+- $p_1, p_2$: probabilities for input signal to be TRUE.
+- $\epsilon_1, \epsilon_2$: the input error probabilities.
+
+**Design Space Complexity of Approximate Logic Synthesis**
+
+Suppose there are up to $k$ possible replacements for a node $n$ in V, so the step `node replacement` has upper bound $k^n$ time complexity. And using the above formula to calculate error, a `BFS` with complexity of $O(m + n)$ is needed, where $m$ and $n$ are edge count and node count respectively.
+
+So, the total complexity will be $O((m + n) \times k^n)$
+
+**Deep Neural Networks**
+
+3 layers: 1 input + 1 hidden + 1 output.
+
+3 operations: `feedforward` computes activations and their derivatives, `backpropagation` computes error values and `update` modifies trainable parameters using a learning rate hyper-parameter.
+
+#### Main Framework
+
+![Deep-PowerX-framework](./README/Deep-PowerX-framework.png)
+
+`Training`: In `training data generation` step, Deep-PowerX replace some node in order to inject error into the network, then use error propagation method to estimate error rates, finally extract some relevant features of a node such as node type and logic level as the training data. In `performing training of the on-board DNN` step, a neural network DNN is trained using generated training data.
+
+`Inference`: The switching activities of nodes are extracted, so critical power nodes can be seleceted and replaced with gates until the critical power nodes are all have either been completely replaced or the error rate constraint has been violated. Then, additional approximations such as power optimization ans area optimization will continue. After the network has been approximated, it will be exported and mapped again using ABC which allows it to be further optimized.
+
+`Testing`: 60% for training, 20% for validation and 20% for testing in DNN.
+
+
+### [Flowtune: Practical multi-armed bandits in boolean optimization](https://ycunxi.github.io/cunxiyu/papers/ICCAD2020_flowtune.pdf)
 
 [Berkeley Open MOS dataBase (BOMB): A Dataset for Silicon Technology Representation Learning]
 
@@ -268,6 +306,22 @@ $$
 [Sampling-Based Approximate Logic Synthesis: An Explainable Machine Learning Approach]
 
 [Resynthesis of logic circuits using machine learning and reconvergent paths]
+
+[Blasys: Approximate logic synthesis using boolean matrix factorization]
+
+[Dals: Delaydriven approximate logic synthesis]
+
+[Substitute-andsimplify: A unified design paradigm for approximate and quality configurable circuits]
+
+[Design and applications of approximate circuits by gate-level pruning]
+
+[Vader: Voltage-driven netlist pruning for cross-layer approximate arithmetic circuits]
+
+[Approximate logic synthesis: A reinforcement learning-based technology mapping approach]
+
+[Developing synthesis flows without human knowledge]
+
+[Drills: Deep reinforcement learning for logic synthesis]
 
 [港中文教授主页](https://zleonhe.github.io/)
 
